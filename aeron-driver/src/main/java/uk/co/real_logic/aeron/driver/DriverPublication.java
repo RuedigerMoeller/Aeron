@@ -198,6 +198,8 @@ public class DriverPublication implements AutoCloseable
 
     public void updatePositionLimitFromStatusMessage(final long limit)
     {
+        if ( limit < 0 ) // no limit set
+            return;
         statusMessagesReceivedCount++;
         senderLimit.lazySet(limit);
     }
@@ -319,8 +321,8 @@ public class DriverPublication implements AutoCloseable
     {
         final int bytesSent;
         final long lastSentPosition = senderPosition.position();
-        final int availableWindow = (int)(senderLimit.get() - lastSentPosition);
-        final int scanLimit = Math.min(availableWindow, mtuLength);
+        final long availableWindow = (senderLimit.get() - lastSentPosition);
+        final int scanLimit = (int)Math.min(availableWindow, mtuLength);
 
         LogScanner scanner = logScanners[activeIndex];
         scanner.scanNext(sendTransmissionUnitFunc, scanLimit);

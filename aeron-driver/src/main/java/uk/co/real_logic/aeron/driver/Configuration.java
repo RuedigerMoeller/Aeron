@@ -311,7 +311,7 @@ public class Configuration
     public static final String SENDER_MULTICAST_FLOW_CONTROL_STRATEGY_PROP_NAME =
         "aeron.sender.multicast.flow.control.strategy";
     public static final String SENDER_MULTICAST_FLOW_CONTROL_STRATEGY = getProperty(
-        SENDER_MULTICAST_FLOW_CONTROL_STRATEGY_PROP_NAME, "uk.co.real_logic.aeron.driver.UnicastSenderFlowControl");
+        SENDER_MULTICAST_FLOW_CONTROL_STRATEGY_PROP_NAME, "uk.co.real_logic.aeron.driver.MaxMulticastSenderFlowControl");
 
     /** Length of the maximum transport unit of the media driver's protocol */
     public static final String MTU_LENGTH_PROP_NAME = "aeron.mtu.length";
