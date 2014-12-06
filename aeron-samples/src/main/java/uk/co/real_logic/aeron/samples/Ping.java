@@ -17,11 +17,14 @@
 package uk.co.real_logic.aeron.samples;
 
 import org.HdrHistogram.Histogram;
+import org.nustaq.fastcast.util.Sleeper;
 import uk.co.real_logic.aeron.Aeron;
 import uk.co.real_logic.aeron.FragmentAssemblyAdapter;
 import uk.co.real_logic.aeron.Publication;
 import uk.co.real_logic.aeron.Subscription;
 import uk.co.real_logic.aeron.common.*;
+import uk.co.real_logic.aeron.driver.Configuration;
+import uk.co.real_logic.aeron.driver.ThreadingMode;
 import uk.co.real_logic.agrona.CloseHelper;
 import uk.co.real_logic.agrona.DirectBuffer;
 import uk.co.real_logic.agrona.concurrent.UnsafeBuffer;
@@ -57,9 +60,18 @@ public class Ping
 
     public static void main(final String[] args) throws Exception
     {
+        System.setProperty(Configuration.MTU_LENGTH_PROP_NAME, "1496" );
         SamplesUtil.useSharedMemoryOnLinux();
 
-        final MediaDriver driver = EMBEDDED_MEDIA_DRIVER ? MediaDriver.launch() : null;
+        final MediaDriver.Context mctx = new MediaDriver.Context()
+            .threadingMode(ThreadingMode.DEDICATED)
+            .conductorIdleStrategy(new BackoffIdleStrategy(1, 1, 1, 1))
+            .sharedNetworkIdleStrategy(new BusySpinIdleStrategy())
+            .sharedIdleStrategy(new BusySpinIdleStrategy())
+            .receiverIdleStrategy(new BusySpinIdleStrategy())
+            .senderIdleStrategy(new BusySpinIdleStrategy());
+        final MediaDriver driver = EMBEDDED_MEDIA_DRIVER ? MediaDriver.launch(mctx) : null;
+
         final Aeron.Context ctx = new Aeron.Context()
             .newConnectionHandler(Ping::newPongConnectionHandler);
 
@@ -97,10 +109,10 @@ public class Ping
                 System.out.println("Histogram of RTT latencies in microseconds.");
                 HISTOGRAM.outputPercentileDistribution(System.out, 1000.0);
             }
-            while (barrier.await());
+            while (true);
         }
 
-        CloseHelper.quietClose(driver);
+//        CloseHelper.quietClose(driver);
     }
 
     private static void sendPingAndReceivePong(
@@ -108,8 +120,10 @@ public class Ping
     {
         final IdleStrategy idleStrategy = new BusySpinIdleStrategy();
 
+        Sleeper sl = new Sleeper();
         for (int i = 0; i < numMessages; i++)
         {
+            sl.sleepMicros(100);
             do
             {
                 ATOMIC_BUFFER.putLong(0, System.nanoTime());

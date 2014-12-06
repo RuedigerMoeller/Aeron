@@ -67,6 +67,6 @@ public class SampleConfiguration
         WARMUP_NUMBER_OF_MESSAGES = Integer.getInteger(WARMUP_NUMBER_OF_MESSAGES_PROP, 5_000);
         WARMUP_NUMBER_OF_ITERATIONS = Integer.getInteger(WARMUP_NUMBER_OF_ITERATIONS_PROP, 10);
         LINGER_TIMEOUT_MS = Long.getLong(LINGER_TIMEOUT_MS_PROP, TimeUnit.SECONDS.toMillis(5));
-        EMBEDDED_MEDIA_DRIVER = Boolean.getBoolean(EMBEDDED_MEDIA_DRIVER_PROP);
+        EMBEDDED_MEDIA_DRIVER = true; //Boolean.getBoolean(EMBEDDED_MEDIA_DRIVER_PROP);
     }
 }

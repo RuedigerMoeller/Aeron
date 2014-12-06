@@ -19,7 +19,9 @@ package uk.co.real_logic.aeron.samples;
 import uk.co.real_logic.aeron.*;
 import uk.co.real_logic.aeron.common.*;
 import uk.co.real_logic.aeron.common.concurrent.SigInt;
+import uk.co.real_logic.aeron.driver.Configuration;
 import uk.co.real_logic.aeron.driver.MediaDriver;
+import uk.co.real_logic.aeron.driver.ThreadingMode;
 import uk.co.real_logic.agrona.CloseHelper;
 import uk.co.real_logic.agrona.DirectBuffer;
 
@@ -43,9 +45,18 @@ public class Pong
 
     public static void main(final String[] args) throws Exception
     {
+        System.setProperty(Configuration.MTU_LENGTH_PROP_NAME, "1496" );
+
         SamplesUtil.useSharedMemoryOnLinux();
 
-        final MediaDriver driver = EMBEDDED_MEDIA_DRIVER ? MediaDriver.launch() : null;
+        final MediaDriver.Context mctx = new MediaDriver.Context()
+            .threadingMode(ThreadingMode.DEDICATED)
+            .conductorIdleStrategy(new BackoffIdleStrategy(1, 1, 1, 1))
+            .sharedNetworkIdleStrategy(new BusySpinIdleStrategy())
+            .sharedIdleStrategy(new BusySpinIdleStrategy())
+            .receiverIdleStrategy(new BusySpinIdleStrategy())
+            .senderIdleStrategy(new BusySpinIdleStrategy());
+        final MediaDriver driver = EMBEDDED_MEDIA_DRIVER ? MediaDriver.launch(mctx) : null;
 
         final Aeron.Context ctx = new Aeron.Context();
         final BusySpinIdleStrategy idleStrategy = new BusySpinIdleStrategy();
