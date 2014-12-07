@@ -102,6 +102,7 @@ public class Ping
             do
             {
                 HISTOGRAM.reset();
+                System.gc();
                 System.out.println("Pinging " + NUMBER_OF_MESSAGES + " messages");
 
                 sendPingAndReceivePong(pingPublication, pongSubscription, NUMBER_OF_MESSAGES);
@@ -123,7 +124,7 @@ public class Ping
         Sleeper sl = new Sleeper();
         for (int i = 0; i < numMessages; i++)
         {
-//            sl.sleepMicros(50);
+//            sl.sleepMicros(50); // 100 = ~9-10k/s, 50 = ~18k/sec
             do
             {
                 ATOMIC_BUFFER.putLong(0, System.nanoTime());
